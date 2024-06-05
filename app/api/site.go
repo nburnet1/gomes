@@ -14,7 +14,6 @@ import (
 // @Produce  json
 // @Success 200 {object} map[string]interface{}
 // @Router /site [get]
-
 func GetSite(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "site",

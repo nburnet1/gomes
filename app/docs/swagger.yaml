@@ -1,20 +1,18 @@
-basePath: /api/v1
 externalDocs:
   description: OpenAPI
   url: https://swagger.io/resources/open-api/
 host: localhost:8080
 info:
   contact:
-    email: support@swagger.io
-    name: API Support
-    url: http://www.swagger.io/support
-  description: This is a sample server celler server.
+    name: Noah Burnette
+    url: https://github.com/nburnet1/gomes/issues
+  description: Describes endpoints used by GoMES.
   license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
+    name: MIT
+    url: https://github.com/nburnet1/gomes/blob/main/LICENSE
   termsOfService: http://swagger.io/terms/
   title: GoMES API
-  version: "1.0"
+  version: "0.0"
 paths:
   /enterprise:
     get:
@@ -32,6 +30,22 @@ paths:
       summary: Get enterprise
       tags:
       - enterprise
+  /site:
+    get:
+      consumes:
+      - application/json
+      description: Get site
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get site
+      tags:
+      - site
 securityDefinitions:
   BasicAuth:
     type: basic

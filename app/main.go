@@ -2,29 +2,32 @@ package main
 
 import (
 	"fmt"
-	"gomes/api"
-	docs "gomes/docs"
+	// "gomes/api"
+	// docs "gomes/docs"
 
-	"github.com/gin-gonic/gin"
+	// "github.com/gin-gonic/gin"
 
-	swaggerfiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	// swaggerfiles "github.com/swaggo/files"
+	// ginSwagger "github.com/swaggo/gin-swagger"
+
+	"log"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 // @title           GoMES API
-// @version         1.0
-// @description     This is a sample server celler server.
+// @version         0.0
+// @description     Describes endpoints used by GoMES.
 // @termsOfService  http://swagger.io/terms/
 
-// @contact.name   API Support
-// @contact.url    http://www.swagger.io/support
-// @contact.email  support@swagger.io
+// @contact.name   Noah Burnette
+// @contact.url    https://github.com/nburnet1/gomes/issues
 
-// @license.name  Apache 2.0
-// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+// @license.name  MIT
+// @license.url   https://github.com/nburnet1/gomes/blob/main/LICENSE
 
 // @host      localhost:8080
-// @BasePath  /api/v1
 
 // @securityDefinitions.basic  BasicAuth
 
@@ -32,14 +35,42 @@ import (
 // @externalDocs.url          https://swagger.io/resources/open-api/
 
 func main() {
-	fmt.Println("Hello!")
-	r := gin.Default()
-	docs.SwaggerInfo.BasePath = "/api/v1"
-	v1 := r.Group("/api/v1")
-	{
-		api.RegisterRoutes(v1)
-	}
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	r.Run(":8080")
+	fmt.Println("Hello!!")
+	// r := gin.Default()
+	// docs.SwaggerInfo.BasePath = "/api/v0"
+	// v1 := r.Group("/api/v0")
+	// {
+	// 	api.RegisterRoutes(v1)
+	// }
+	// r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	db, err := connectToPostgreSQL()
 
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Perform database migration
+	err = db.Table("public.users").AutoMigrate(&User{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// r.Run(":8080")
+
+}
+
+func connectToPostgreSQL() (*gorm.DB, error) {
+	dsn := "user=postgres password=password dbname=gomes host=timescaledb port=5432 sslmode=disable"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
+type User struct {
+	ID   uint `gorm:"primaryKey"`
+	Name string
+	Age  uint
 }

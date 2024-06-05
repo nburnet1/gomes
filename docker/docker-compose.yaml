@@ -4,9 +4,19 @@ services:
   gomes:
     build:
       context: ./images/gomes
-      dockerfile: dockerfile
     ports:
       - "8080:8080"
       - "80:80"
     volumes:
       - ../app:/app
+  timescaledb:
+    build:
+      context: ./images/database
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+      POSTGRES_DB: gomes
+    ports:
+      - "5432:5432"
+
+  

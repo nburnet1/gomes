@@ -1,2 +1,4 @@
 [build]
+pre_cmd = ["swag init"]
 cmd = "go build -o ./tmp/main ./main.go"
+exclude_dir = ["docs"]

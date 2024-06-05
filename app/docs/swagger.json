@@ -1,22 +1,20 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is a sample server celler server.",
+        "description": "Describes endpoints used by GoMES.",
         "title": "GoMES API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
-            "name": "API Support",
-            "url": "http://www.swagger.io/support",
-            "email": "support@swagger.io"
+            "name": "Noah Burnette",
+            "url": "https://github.com/nburnet1/gomes/issues"
         },
         "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+            "name": "MIT",
+            "url": "https://github.com/nburnet1/gomes/blob/main/LICENSE"
         },
-        "version": "1.0"
+        "version": "0.0"
     },
     "host": "localhost:8080",
-    "basePath": "/api/v1",
     "paths": {
         "/enterprise": {
             "get": {
@@ -31,6 +29,30 @@
                     "enterprise"
                 ],
                 "summary": "Get enterprise",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/site": {
+            "get": {
+                "description": "Get site",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "site"
+                ],
+                "summary": "Get site",
                 "responses": {
                     "200": {
                         "description": "OK",
