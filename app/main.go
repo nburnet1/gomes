@@ -12,6 +12,8 @@ import (
 
 	"log"
 
+	"gomes/model/isa95"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -49,8 +51,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Perform database migration
-	err = db.Table("public.users").AutoMigrate(&User{})
+	err = db.AutoMigrate(&isa95.PersonnelClassProp{}, &isa95.PersonnelClassProp{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,7 +71,7 @@ func connectToPostgreSQL() (*gorm.DB, error) {
 }
 
 type User struct {
-	ID   uint `gorm:"primaryKey"`
+	ID   uint
 	Name string
 	Age  uint
 }
