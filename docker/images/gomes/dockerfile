@@ -2,7 +2,14 @@ FROM golang:1.22-alpine
 
 WORKDIR /app
 
+
+
 RUN go install github.com/air-verse/air@latest
 RUN go install github.com/swaggo/swag/cmd/swag@latest
 
-CMD ["air", "-c", ".air.toml"]
+RUN mkdir /.cache && chown -R 1000:1000 /.cache
+RUN chown -R 1000:1000 /go
+
+USER 1000
+
+CMD ["air", "-c", "server/internal/.air.toml"]

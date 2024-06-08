@@ -18,5 +18,3 @@ services:
       POSTGRES_DB: gomes
     ports:
       - "5432:5432"
-
-  
