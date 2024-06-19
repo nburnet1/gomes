@@ -1,6 +1,0 @@
-tmp_dir = "server/internal/tmp"
-[build]
-pre_cmd = ["swag init --dir ./server/cmd/server --output ./server/internal/docs"]
-cmd = "go build -o server/internal/tmp/main ./server/cmd/server/main.go"
-exclude_dir = ["server/internal/docs", "server/internal/model/dao", "server/internal/tmp"]
-bin = "server/internal/tmp/main"

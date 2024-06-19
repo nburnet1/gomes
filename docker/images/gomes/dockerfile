@@ -12,4 +12,4 @@ RUN chown -R 1000:1000 /go
 
 USER 1000
 
-CMD ["air", "-c", "server/internal/.air.toml"]
+CMD ["air", "-c", "./.air.toml"]

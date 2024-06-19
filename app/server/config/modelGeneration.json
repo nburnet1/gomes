@@ -1,0 +1,13 @@
+{
+    "output": "./server/internal/model/gen/modelGeneration.go",
+    "packageName": "ref",
+    "modelList": [
+        {
+            "path": "gomes/server/internal/model/isa95",
+            "excludedModels": [
+                "OperationProp"
+            ]
+        }
+    ],
+    "excludeFromDaoCreation": []
+}
