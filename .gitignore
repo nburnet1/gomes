@@ -1,2 +1,2 @@
-app/tmp
+app/cmd/tmp
 .env

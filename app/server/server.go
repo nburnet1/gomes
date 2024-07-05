@@ -36,14 +36,12 @@ import (
 
 // @externalDocs.description	OpenAPI
 // @externalDocs.url			https://swagger.io/resources/open-api/
-func Start() {
+func Start(serverError *err.Error) {
 
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 
-	serverError := err.NewError(logger)
-
-	modelGen, err := gomesGen.NewModelGenerationFromFile("../../server/config/modelGeneration.json")
+	modelGen, err := gomesGen.NewModelGenerationFromFile("./server/config/modelGeneration.json")
 	serverError.SetErrorAndFatalIfNotNil(err)
 
 	err = modelGen.SetModelsToGenerateAndWriteToFile()
@@ -53,7 +51,7 @@ func Start() {
 	serverError.SetErrorAndFatalIfNotNil(err)
 
 	daoGenerator := gen.NewGenerator(gen.Config{
-		OutPath: "../../server/internal/dao/isa95/",
+		OutPath: "./server/internal/dao/isa95/",
 		Mode:    gen.WithoutContext | gen.WithDefaultQuery,
 	})
 

@@ -27,7 +27,7 @@ info:
     url: https://github.com/nburnet1/gomes/issues
   description: Describes endpoints used by GoMES.
   license:
-    name: MIT
+    name: GPL v3.0
     url: https://github.com/nburnet1/gomes/blob/main/LICENSE
   termsOfService: http://swagger.io/terms/
   title: GoMES API

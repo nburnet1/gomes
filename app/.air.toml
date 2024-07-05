@@ -1,5 +1,5 @@
 [build]
 pre_cmd = ["swag init -g ./server/server.go -o ./server/internal/api/docs -q && swag fmt"]
-cmd = "go build -o ./tmp/main ./cmd/gomes/main.go"
-exclude_dir = ["server/internal/api/docs", "server/internal/dao", "server/internal/tmp", "server/internal/model/gen"]
-bin = "server/internal/tmp/main"
+cmd = "go build -o ./cmd/tmp/main ./cmd/gomes/main.go"
+exclude_dir = ["server/internal/api/docs", "server/internal/dao", "cmd/tmp", "server/internal/model/gen"]
+bin = "./cmd/tmp/main"

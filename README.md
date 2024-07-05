@@ -1,13 +1,34 @@
 # GoMES
 
-GoMES is an extendable application extending the ISA95 standard with modern web technology. 
+GoMES is an MES application extending the ISA95 standard with modern web technologies.
 
-## Capabilities
+## Server Features
 
-- Container First Local Development
-- Edge communication
-- RESTful API
-- Automated DAOs
-- OPC-UA to MQTT conversion
-- Automated API and Model documentation
+- [x] RESTful API
+- [x] Automated API and model documentation via Swag
+- [x] Automatic DAO creation
+- [x] Implements ISA95 models
+- [x] Developer expandable
+- [x] Bring your own front-end
+- [x] Container first development
+- [x] Live reload
+- [ ] Developer Mode
+- [ ] OAuth2
+- [ ] Basic Authentication
+- [ ] Websockets
+- [ ] On change MQTT events
+- [ ] Built in CLI
+- [ ] HyperTable creation
 
+## Edge Features
+
+- [ ] OPC-UA server
+- [ ] OPC-UA to MQTT
+- [ ] IODB configurability
+- [ ] Built in CLI
+
+## Getting Started
+
+### Server
+
+### Edge

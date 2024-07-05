@@ -15,7 +15,7 @@ const docTemplate = `{
             "url": "https://github.com/nburnet1/gomes/issues"
         },
         "license": {
-            "name": "MIT",
+            "name": "GPL v3.0",
             "url": "https://github.com/nburnet1/gomes/blob/main/LICENSE"
         },
         "version": "{{.Version}}"
