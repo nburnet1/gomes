@@ -1,0 +1,18 @@
+{{range $k, $v := .}}
+    <ul>
+        <details>
+            <summary 
+                {{ if $v.HasChildren }}
+                    hx-get="/admin/namespace?topic={{$v.Topic}}" 
+                    hx-swap="afterend" 
+                    hx-trigger="click once"
+                {{ else }}
+                    class="list-none"
+                    hx-get="/admin/node?topic={{$v.Topic}}"
+                    hx-target="#edit-node"
+                {{ end }}>
+                {{$k}}
+            </summary>
+        </details>
+    </ul>
+{{end}}

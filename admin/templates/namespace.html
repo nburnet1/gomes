@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Home</title>
+    {{template "head.html" .}}
+  </head>
+  {{template "navbar.html" .}}
+  <body hx-boost="true">
+    <div class="flex h-full">
+      <aside class="bg-gray-500 pr-6">
+        {{if gt (len .) 0}}
+        {{template "node.html" .}}
+        {{else}}
+        <p>No nodes in namespace</p>
+        {{end}}
+      </aside>
+      <div id="edit-node" class="flex items-center justify-center"> </div>
+    </div>
+  </body>
+</html>
