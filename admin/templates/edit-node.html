@@ -1,0 +1,11 @@
+<form hx-put="/admin/node" hx-swap="none" hx-vals='{"topic": "{{.Topic}}"}'>
+ <h3 id="topic" name="topic"> {{.Topic}} </h3>
+{{range $k, $v := .Data}}
+    <div>
+        <label class="block text-sm font-medium text-gray-700" for="{{$k}}">{{$k}}</label>
+        <input class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" type="text" id="{{$k}}" name="{{$k}}" value="{{$v}}">
+
+    </div>
+{{end}}
+    <button class="mt-1 block w-full px-3 py-2 bg-blue-500 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" type="submit">Submit</button>
+</form>

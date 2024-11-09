@@ -1,34 +1,14 @@
-# GoMES
+# GoMES 🚧 WIP
 
-GoMES is an MES application extending the ISA95 standard with modern web technologies.
+A batteries-included framework for MES equipped with an event-driven namespace, ORM, and RESTful API toolkit.
 
-## Server Features
+## Motivation
 
-- [x] RESTful API
-- [x] Automated API and model documentation via Swag
-- [x] Automatic DAO creation
-- [x] Implements ISA95 models
-- [x] Developer expandable
-- [x] Bring your own front-end
-- [x] Container first development
-- [x] Live reload
-- [ ] Developer Mode
-- [ ] OAuth2
-- [ ] Basic Authentication
-- [ ] Websockets
-- [ ] On change MQTT events
-- [ ] Built in CLI
-- [ ] HyperTable creation
+GoMES aims to provide a simple, code-first template for MES solutions. The motivation is to decouple from platforms and to *hopefully* transition into a more open source approach within the integration industry.
 
-## Edge Features
+## Vision for GoMES
 
-- [ ] OPC-UA server
-- [ ] OPC-UA to MQTT
-- [ ] IODB configurability
-- [ ] Built in CLI
-
-## Getting Started
-
-### Server
-
-### Edge
+- Open source and community driven
+- Replacement for low-code/platform solutions ([MING](https://www.influxdata.com/blog/-ming-stack-introduction-influxdb/), [Ignition](https://inductiveautomation.com/ignition/), [Litmus](https://litmus.io/))
+- Approachable in a way that integrators from all fields could use.
+- Refactorable into *any* "server side" language
