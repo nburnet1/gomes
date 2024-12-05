@@ -1,7 +1,8 @@
 package model
 
 import (
-	"gomes/namespace"
+	"github.com/nburnet1/gomes/pkg/namespace"
+	"github.com/nburnet1/gomes/config"
 	"path"
 	"time"
 )
@@ -9,7 +10,7 @@ import (
 func init() {
 	namespace.RegisterModels(Asset{})
 	asset := Asset{AssetID: 10444}
-	namespace.DB.First(&asset, asset.AssetID)
+	config.DB.First(&asset, asset.AssetID)
 	// asset := Asset{
 	// 	AssetID:    1,
 	// 	Topic:      "Enterprise/Site/Area/Machine1",
@@ -43,5 +44,5 @@ type Asset struct {
 
 func someFunction(engine *namespace.NamespaceEngine, path string, oldValue, newValue interface{}, oldTimestamp time.Time) {
 	newAsset := newValue.(Asset)
-	namespace.DB.Save(&newAsset)
+	config.DB.Save(&newAsset)
 }

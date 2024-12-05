@@ -1,4 +1,4 @@
-package namespace
+package config
 
 import "github.com/gin-gonic/gin"
 

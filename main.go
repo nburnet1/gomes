@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"gomes/model"
-	_ "gomes/admin/model"
-	_ "gomes/admin/api"
-	"gomes/namespace"
+	"github.com/nburnet1/gomes/model"
+	"github.com/nburnet1/gomes/config"
+	_ "github.com/nburnet1/gomes/admin/model"
+	_ "github.com/nburnet1/gomes/admin/api"
+	"github.com/nburnet1/gomes/pkg/namespace"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,7 +19,7 @@ func main() {
 	*/
 	var err error
 
-	err = namespace.MigrateFromRegistry()
+	err = config.MigrateFromRegistry()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -39,12 +40,12 @@ func main() {
 	namespace.Engine.CreateNode("Enterprise/Site/Area/Machine1/AnotherNode", 4510, nil)
 
 	r := gin.Default()
-	r.LoadHTMLGlob("admin/templates/*")
+	r.LoadHTMLGlob("admin/templates/**/*")
 
-	namespace.EnableEndpointsFromEngine(r)
+	config.EnableEndpointsFromEngine(r)
 
 	// fmt.Println(namespace.Engine)
-	fmt.Println(namespace.GetEndpointRegistry())
+	fmt.Println(config.GetEndpointRegistry())
 
 	err = r.SetTrustedProxies(nil)
 	if err != nil {

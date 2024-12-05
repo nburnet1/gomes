@@ -1,4 +1,4 @@
-module gomes
+module github.com/nburnet1/gomes
 
 go 1.23.0
 
