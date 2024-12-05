@@ -2,43 +2,44 @@ package api
 
 import (
 	"fmt"
-	"gomes/admin/model"
-	"gomes/namespace"
-	"gomes/util"
+	"github.com/nburnet1/gomes/admin/model"
+	"github.com/nburnet1/gomes/pkg/namespace"
+	"github.com/nburnet1/gomes/util"
+	"github.com/nburnet1/gomes/config"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 func init() {
-	endpoints := []namespace.Endpoint{
+	endpoints := []config.Endpoint{
 		{
-			Method:   namespace.GET,
+			Method:   config.GET,
 			Url:      "/admin/namespace",
 			Handlers: []gin.HandlerFunc{getNamespace},
 		},
 		{
-			Method:   namespace.GET,
+			Method:   config.GET,
 			Url:      "/admin/node",
 			Handlers: []gin.HandlerFunc{getNode},
 		},
 		{
-			Method:   namespace.PUT,
+			Method:   config.PUT,
 			Url:      "/admin/node",
 			Handlers: []gin.HandlerFunc{updateNode},
 		},
 		{
-			Method:   namespace.GET,
+			Method:   config.GET,
 			Url:      "/admin/asset/test",
 			Handlers: []gin.HandlerFunc{testAsset},
 		},
 		{
-			Method:   namespace.GET,
+			Method:   config.GET,
 			Url:      "/admin/time",
 			Handlers: []gin.HandlerFunc{getTime},
 		},
 	}
-	namespace.RegisterEndpoints(endpoints...)
+	config.RegisterEndpoints(endpoints...)
 }
 
 func getNamespace(c *gin.Context) {

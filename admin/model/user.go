@@ -1,6 +1,6 @@
 package model
 
-import "gomes/namespace"
+import "github.com/nburnet1/gomes/pkg/namespace"
 
 
 func init(){

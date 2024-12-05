@@ -2,7 +2,7 @@ package model
 
 import (
 	"fmt"
-	"gomes/namespace"
+	"github.com/nburnet1/gomes/pkg/namespace"
 	"time"
 )
 
