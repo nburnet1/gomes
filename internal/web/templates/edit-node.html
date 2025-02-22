@@ -1,0 +1,4 @@
+<h3 id="topic" name="topic">{{.Topic}}</h3>
+<span hx-ext="sse" sse-connect="/sse/admin/node?topic={{.Topic}}" sse-swap="message">
+  {{.}}
+</span>

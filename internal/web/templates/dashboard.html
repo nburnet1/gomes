@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Dashboard</title>
+    {{template "head.html" .}}
+  </head>
+  {{template "navbar.html" .}}
+  <body hx-boost="true">
+    <h1>Welcome, {{ . }}</h1>
+    <p>Role: {{ .Role }}</p>
+    <a href="/logout">Logout</a>
+  </body>
+</html>

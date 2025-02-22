@@ -1,0 +1,20 @@
+{
+  "auth": {
+    "grpc" :{
+        "host": "localhost",
+        "port": "50051"
+    },
+    "jwt_secret": "supersecretkey"
+  },
+  "order": {
+    "grpc" :{
+        "host": "localhost",
+        "port": "50052"
+    },
+    "database_url": "postgres://user:password@db:5432/orders"
+  },
+  "web": {
+    "host": "localhost",
+    "port": "8080"
+  }
+}

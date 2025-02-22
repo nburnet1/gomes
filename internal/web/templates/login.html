@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Login</title>
+    {{template "head.html" .}}
+  </head>
+  <body hx-boost="true">
+    <div class="container">
+        <h2>Login</h2>
+        <form hx-post="/login" hx-swap="innerHTML" hx-target="#response">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <div id="response"></div>
+    </div>
+  </body>
+</html>

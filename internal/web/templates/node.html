@@ -1,0 +1,18 @@
+{{range .Nodes}}
+    <ul>
+        <details>
+            <summary 
+                {{ if eq .Name "Enterprise" }}
+                    hx-get="/admin/namespace?topic={{.Topic}}" 
+                    hx-swap="afterend" 
+                    hx-trigger="click once"
+                {{ else }}
+                    class="list-none"
+                    hx-get="/admin/node?topic={{.Topic}}"
+                    hx-target="#edit-node"
+                {{ end }}>
+                {{.Name}}
+            </summary>
+        </details>
+    </ul>
+{{end}}

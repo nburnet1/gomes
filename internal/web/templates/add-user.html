@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Dashboard</title>
+    {{template "head.html" .}}
+  </head>
+  {{template "navbar.html" .}}
+<body hx-boost="true">
+    <h2>Add User</h2>
+    <form hx-post="/admin/users" hx-target="#response" hx-swap="innerHTML">
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <select name="role">
+            <option value="admin">Admin</option>
+            <option value="user">User</option>
+        </select>
+        <button type="submit">Add User</button>
+    </form>
+    <div id="response"></div>
+</body>
+</html>

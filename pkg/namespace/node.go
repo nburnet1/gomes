@@ -36,6 +36,13 @@ func (n node) GetParent() *node {
 	return n.parent
 }
 
+func (n node) GetParentTopic() string {
+	if n.parent == nil {
+		return ""
+	}
+	return n.parent.topic
+}
+
 func (n node) GetChildren() map[string]*node {
 	return n.children
 }

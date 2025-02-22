@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package namespace;
+option go_package = "./proto";
+
+// The Namespace service definition
+service NamespaceService {
+    rpc CreateNode (CreateNodeRequest) returns (Node);
+    rpc ReadNode (ReadNodeRequest) returns (Node);
+    rpc UpdateNode (UpdateNodeRequest) returns (Node);
+    rpc DeleteNode (DeleteNodeRequest) returns (DeleteNodeResponse);
+    rpc BrowseNodes (BrowseNodesRequest) returns (BrowseNodesResponse);
+    rpc BrowseRootNodes (BrowseRootNodesRequest) returns (BrowseNodesResponse);
+    rpc GetChildren (ReadNodeRequest) returns (BrowseNodesResponse);
+    rpc SubNode (SubNodeRequest) returns (stream NodeUpdate);
+}
+
+// Represents a node in the namespace
+message Node {
+    string topic = 1;
+    string name = 2;
+    string parent_topic = 3;
+    string value = 4;
+    string timestamp = 6;
+}
+
+// Request for creating a node
+message CreateNodeRequest {
+    string topic = 1;
+    string value = 2;
+}
+
+// Request for reading a node
+message ReadNodeRequest {
+    string topic = 1;
+}
+
+message ReadNodeResponse {
+    Node node = 1;
+}
+
+// Request for updating a node
+message UpdateNodeRequest {
+    string topic = 1;
+    string value = 2;
+}
+
+// Request for deleting a node
+message DeleteNodeRequest {
+    string topic = 1;
+}
+
+// Response for deleting a node
+message DeleteNodeResponse {
+    bool success = 1;
+}
+
+// Request for browsing all nodes
+message BrowseNodesRequest {}
+
+// Request for browsing root nodes
+message BrowseRootNodesRequest {}
+
+// Response containing a list of nodes
+message BrowseNodesResponse {
+    repeated Node nodes = 1;
+}
+
+// Request for subscribing to a node's updates
+message SubNodeRequest {
+    string topic = 1;
+}
+
+// Streamed response for node updates
+message NodeUpdate {
+    string topic = 1;
+    string value = 2;
+    string timestamp = 3;
+}
