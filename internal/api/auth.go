@@ -49,7 +49,7 @@ func handleLogin(c *gin.Context) {
 		Password: password,
 	})
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+		RenderError(c, http.StatusUnauthorized, "Invalid username or password")
 		return
 	}
 

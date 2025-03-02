@@ -36,22 +36,24 @@ func handleAddUser(c *gin.Context) {
 
 	// Validate input
 	if username == "" || password == "" || role == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "All fields are required"})
+		RenderError(c, http.StatusBadRequest, "All fields are required")
 		return
 	}
 
 	// Create user object
 	// user := database.User{Username: username, Role: role}
 	// if err := user.SetPassword(password); err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+	// 	RenderError(c, http.StatusInternalServerError, "Failed to hash password")
 	// 	return
 	// }
 
 	// // Save user to database
 	// if err := database.DB.Create(&user).Error; err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+	// 	RenderError(c, http.StatusInternalServerError, "Failed to create user")
 	// 	return
 	// }
 
-	c.JSON(http.StatusOK, gin.H{"message": "User created successfully"})
+	c.HTML(http.StatusOK, "add-user.html", gin.H{
+		"message": "User created successfully",
+	})
 }

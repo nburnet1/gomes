@@ -2,25 +2,22 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net"
-	"sync"
-	"time"
 
 	"github.com/nburnet1/gomes/internal/config"
 	"github.com/nburnet1/gomes/pkg/namespace"
 	pb "github.com/nburnet1/gomes/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 // NamespaceServer implements NamespaceService
 type NamespaceServer struct {
 	pb.UnimplementedNamespaceServiceServer
 	namespaceEngine *namespace.NamespaceEngine
-	subscribers    map[string][]chan *pb.NodeUpdate
-	mu             sync.Mutex
+	subscribers     map[string][]chan *pb.NodeUpdate
 }
 
 // CreateNode RPC
@@ -29,10 +26,9 @@ func (s *NamespaceServer) CreateNode(ctx context.Context, in *pb.CreateNodeReque
 	if err != nil {
 		return nil, err
 	}
-
 	return &pb.Node{
 		Topic:       node.GetTopic(),
-		Value:       toJSONString(node.GetValue()),
+		Value:       node.GetValue(),
 		ParentTopic: node.GetParentTopic(),
 		Name:        node.GetName(),
 		Timestamp:   node.GetTimeStamp().String(),
@@ -48,7 +44,7 @@ func (s *NamespaceServer) ReadNode(ctx context.Context, in *pb.ReadNodeRequest) 
 
 	return &pb.Node{
 		Topic:       node.GetTopic(),
-		Value:       toJSONString(node.GetValue()),
+		Value:       node.GetValue(),
 		ParentTopic: node.GetParentTopic(),
 		Name:        node.GetName(),
 		Timestamp:   node.GetTimeStamp().String(),
@@ -68,7 +64,7 @@ func (s *NamespaceServer) GetChildren(ctx context.Context, in *pb.ReadNodeReques
 	for _, child := range children {
 		pbNodes = append(pbNodes, &pb.Node{
 			Topic:       child.GetTopic(),
-			Value:       toJSONString(child.GetValue()),
+			Value:       child.GetValue(),
 			ParentTopic: child.GetParentTopic(),
 			Name:        child.GetName(),
 			Timestamp:   child.GetTimeStamp().String(),
@@ -85,19 +81,16 @@ func (s *NamespaceServer) UpdateNode(ctx context.Context, in *pb.UpdateNodeReque
 		return nil, err
 	}
 
-	value := toJSONString(node.GetValue())
-
-	// Notify subscribers about the update
-	s.notifySubscribers(in.Topic, value)
 
 	return &pb.Node{
 		Topic:       node.GetTopic(),
-		Value:       toJSONString(node.GetValue()),
+		Value:       node.GetValue(),
 		ParentTopic: node.GetParentTopic(),
 		Name:        node.GetName(),
 		Timestamp:   node.GetTimeStamp().String(),
 	}, nil
 }
+
 
 // DeleteNode RPC
 func (s *NamespaceServer) DeleteNode(ctx context.Context, in *pb.DeleteNodeRequest) (*pb.DeleteNodeResponse, error) {
@@ -116,7 +109,7 @@ func (s *NamespaceServer) BrowseNodes(ctx context.Context, in *pb.BrowseNodesReq
 	for _, node := range nodes {
 		pbNodes = append(pbNodes, &pb.Node{
 			Topic:       node.GetTopic(),
-			Value:       toJSONString(node.GetValue()),
+			Value:       node.GetValue(),
 			ParentTopic: node.GetParentTopic(),
 			Name:        node.GetName(),
 			Timestamp:   node.GetTimeStamp().String(),
@@ -126,17 +119,15 @@ func (s *NamespaceServer) BrowseNodes(ctx context.Context, in *pb.BrowseNodesReq
 }
 
 
-
-
 // BrowseRootNodes RPC
 func (s *NamespaceServer) BrowseRootNodes(ctx context.Context, in *pb.BrowseRootNodesRequest) (*pb.BrowseNodesResponse, error) {
 	nodes := s.namespaceEngine.BrowseRootNodes()
 	pbNodes := []*pb.Node{}
-
+	
 	for _, node := range nodes {
 		pbNodes = append(pbNodes, &pb.Node{
 			Topic:       node.GetTopic(),
-			Value:       toJSONString(node.GetValue()),
+			Value:       node.GetValue(),
 			ParentTopic: node.GetParentTopic(),
 			Name:        node.GetName(),
 			Timestamp:   node.GetTimeStamp().String(),
@@ -148,62 +139,26 @@ func (s *NamespaceServer) BrowseRootNodes(ctx context.Context, in *pb.BrowseRoot
 
 // SubNode (streaming RPC)
 func (s *NamespaceServer) SubNode(in *pb.SubNodeRequest, stream pb.NamespaceService_SubNodeServer) error {
-	s.mu.Lock()
-	updateChan := make(chan *pb.NodeUpdate, 10)
-	s.subscribers[in.Topic] = append(s.subscribers[in.Topic], updateChan)
-	s.mu.Unlock()
+	// Subscribe to NamespaceEngine
+	updateChan, err := namespace.Engine.SubNode(in.Topic)
+	if err != nil {
+		return fmt.Errorf("failed to subscribe to node: %v", err)
+	}
 
-	defer func() {
-		s.mu.Lock()
-		for i, ch := range s.subscribers[in.Topic] {
-			if ch == updateChan {
-				s.subscribers[in.Topic] = append(s.subscribers[in.Topic][:i], s.subscribers[in.Topic][i+1:]...)
-				break
-			}
-		}
-		s.mu.Unlock()
-		close(updateChan)
-	}()
-
-	// Send updates to the subscriber
+	// Stream updates from NamespaceEngine to gRPC clients
 	for update := range updateChan {
-		if err := stream.Send(update); err != nil {
+		nodeUpdate := &pb.NodeUpdate{
+			Topic: in.Topic,
+			Value: update, // Convert the value to a string
+		}
+
+		if err := stream.Send(nodeUpdate); err != nil {
 			log.Printf("Error sending update for %s: %v", in.Topic, err)
 			return err
 		}
 	}
 
-
 	return nil
-}
-
-// Notify subscribers of node updates
-func (s *NamespaceServer) notifySubscribers(topic string, value string) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	update := &pb.NodeUpdate{
-		Topic:     topic,
-		Value:     value,
-		Timestamp: time.Now().UTC().Format(time.RFC3339),
-	}
-
-	for _, ch := range s.subscribers[topic] {
-		select {
-		case ch <- update:
-		default:
-			log.Printf("Dropping update for %s (subscriber too slow)", topic)
-		}
-	}
-}
-
-// Converts a value to JSON string
-func toJSONString(value interface{}) string {
-	jsonValue, err := json.Marshal(value)
-	if err != nil {
-		return "{}"
-	}
-	return string(jsonValue)
 }
 
 // Get parent topic (if exists)
@@ -223,8 +178,13 @@ func main() {
 	namespace.Engine.CreateNode("Enterprise/someTag", map[string]string{"hello": "hello"}, nil)
 	namespace.Engine.CreateNode("anotherTag", "test", nil)
 	namespace.Engine.CreateNode("SomeNodeToTest", 45, nil)
-	namespace.Engine.CreateNode("Enterprise/Site/Area/Machine1/AnotherNode", 4510, nil)
+	_, err := namespace.Engine.CreateNode("Enterprise/Site/Area/Machine1/AnotherNode", 4510, nil)
+	namespace.Engine.CreateNode("Enterprise/Site/testTag", "test", nil)
+	if err != nil {
+		fmt.Println("Error creating node:", err)
+	}
 
+	fmt.Println("nodes:",namespace.Engine.BrowseNodes())
 	// gRPC Server
 	server := grpc.NewServer()
 	namespaceServer := &NamespaceServer{
@@ -232,15 +192,16 @@ func main() {
 		subscribers:     make(map[string][]chan *pb.NodeUpdate),
 	}
 	pb.RegisterNamespaceServiceServer(server, namespaceServer)
-
+	reflection.Register(server)
 	listener, err := net.Listen("tcp", ":50055")
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
-	
 
 	log.Println("Namespace gRPC service running on :50055")
 	if err := server.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
+
+	
 }

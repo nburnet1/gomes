@@ -1,0 +1,28 @@
+
+  <span
+    id="center-span"
+    name="stash-values-{{.Topic}}"
+    class="flex flex-col p-4 mt-3 bg-slate-50 rounded-lg border border-slate-200 shadow-sm"
+    hx-trigger="sse:nodeUpdated"
+    hx-get="/admin/node/stash?topic={{.Topic}}"
+  >
+    <div class="flex justify-between items-center p-2">
+      <div class="">{{.Topic}}</div>
+      <button
+        hx-on:click='document.getElementsByName("stash-values-{{.Topic}}")[0].remove()'
+        class="rounded border hover:text-red-600 text-xl px-2"
+      >
+        ×
+      </button>
+    </div>
+    <pre class="max-h-64">{{.Value}}</pre>
+    {{.Type}}
+
+    <div class="flex justify-between items-center mt-2 gap-2">
+      <span class="text-slate-500 text-xs font-medium">Last updated:</span>
+      <span class="text-slate-700 text-sm bg-slate-100 px-2 py-1 rounded"
+        >{{.Timestamp}}</span
+      >
+    </div>
+  </span>
+

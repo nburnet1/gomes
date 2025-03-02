@@ -20,14 +20,14 @@ message Node {
     string topic = 1;
     string name = 2;
     string parent_topic = 3;
-    string value = 4;
-    string timestamp = 6;
+    bytes value = 4;
+    string timestamp = 5;
 }
 
 // Request for creating a node
 message CreateNodeRequest {
     string topic = 1;
-    string value = 2;
+    bytes value = 2;
 }
 
 // Request for reading a node
@@ -42,7 +42,7 @@ message ReadNodeResponse {
 // Request for updating a node
 message UpdateNodeRequest {
     string topic = 1;
-    string value = 2;
+    bytes value = 2;
 }
 
 // Request for deleting a node
@@ -74,6 +74,6 @@ message SubNodeRequest {
 // Streamed response for node updates
 message NodeUpdate {
     string topic = 1;
-    string value = 2;
+    bytes value = 2;
     string timestamp = 3;
 }

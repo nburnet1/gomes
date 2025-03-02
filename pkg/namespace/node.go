@@ -8,12 +8,12 @@ import (
 type node struct {
 	topic        string 
 	name         string
-	value        interface{}
+	value        []byte
 	timeStamp    time.Time
 	parent       *node
 	children     map[string]*node
 	eventHandler EventHandler
-	channel chan interface{}
+	channel chan []byte
 }
 
 func (n node) GetName() string {
@@ -24,7 +24,7 @@ func (n node) GetTopic() string {
 	return n.topic
 }
 
-func (n node) GetValue() interface{} {
+func (n node) GetValue() []byte {
 	return n.value
 }
 

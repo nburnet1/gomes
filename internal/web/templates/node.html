@@ -1,18 +1,29 @@
-{{range .Nodes}}
-    <ul>
+<div class="group group-last:hover:border-l-1 border-blue-600">
+{{range .}}
+    <ul class="pl-4 ">
         <details>
-            <summary 
-                {{ if eq .Name "Enterprise" }}
+            <summary
+                {{ if eq .Value "\"_folder\"" }}
+                    class="cursor-pointer font-semibold hover:text-blue-600 transition-colors duration-200"
                     hx-get="/admin/namespace?topic={{.Topic}}" 
                     hx-swap="afterend" 
                     hx-trigger="click once"
+                    >
+                    {{.Name}}
                 {{ else }}
-                    class="list-none"
+                    class="list-none cursor-pointer hover:font-medium transition-colors duration-200"
                     hx-get="/admin/node?topic={{.Topic}}"
                     hx-target="#edit-node"
-                {{ end }}>
-                {{.Name}}
+                    >
+                        <div class="px-2 flex justify-between items-center h-4 hover:bg-blue-100 rounded">
+                        <div class="pr-2">{{.Name}}</div>
+                        <div class="truncate font-mono text-ellipsis text-xs flex-1 flex justify-end"
+                        sse-swap="updated-{{.Topic}}">{{.Value}}</div>
+                        <div>
+                    
+                {{ end }}
             </summary>
         </details>
     </ul>
 {{end}}
+<div>

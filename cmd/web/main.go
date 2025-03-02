@@ -10,12 +10,12 @@ import (
 	_ "github.com/nburnet1/gomes/internal/api"
 )
 
-
 func main() {
 	grpcclient.InitGRPC()	
 	grpcclient.InitAuthGRPC()
 	
 	r := gin.Default()
+	r.Static("/static", "internal/web/static")
 	r.LoadHTMLGlob("internal/web/templates/*.html")
 	config.EnableEndpointsFromEngine(r)
 
@@ -32,5 +32,6 @@ func main() {
 	defer grpcclient.GrpcConn.Close()
 	defer grpcclient.AuthGrpcConn.Close()
 }
+
 
 

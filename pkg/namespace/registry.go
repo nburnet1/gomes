@@ -15,7 +15,7 @@ func RegisterNodes(nodeInstances ...*NodeInstance) {
 
 type NodeInstance struct {
 	Topic        string
-	Value        interface{}
+	Value        any
 	EventHandler EventHandler
 }
 
@@ -36,14 +36,14 @@ func getFunctionName(handler EventHandler) string {
 }
 
 // Global Registry for Models
-var modelRegistry = make(map[string]interface{})
+var modelRegistry = make(map[string]any)
 
-func RegisterModels(models ...interface{}) {
+func RegisterModels(models ...any) {
 	for _, model := range models {
 		modelRegistry[reflect.TypeOf(model).String()] = model
 	}
 }
 
-func GetModelRegistry() map[string]interface{} {
+func GetModelRegistry() map[string]any {
 	return modelRegistry
 }

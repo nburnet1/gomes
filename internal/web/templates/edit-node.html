@@ -1,4 +1,41 @@
-<h3 id="topic" name="topic">{{.Topic}}</h3>
-<span hx-ext="sse" sse-connect="/sse/admin/node?topic={{.Topic}}" sse-swap="message">
-  {{.}}
-</span>
+<div
+  id="node"
+  class="flex flex-col bg-white p-4 gap-2 rounded-xl shadow-md border border-slate-200"
+>
+  <div class="flex justify-end flex-0">
+    <button
+      class="bg-blue-600 rounded px-4 py-2 text-white"
+      hx-get="/admin/node/stash?topic={{.Topic}}"
+      hx-target="#stash"
+      hx-swap="beforeend"
+    >
+      Stash ↗
+    </button>
+  </div>
+  <h3
+    id="topic"
+    name="topic"
+    class="text-lg font-medium font-mono tracking-wide text-blue-500"
+  >
+    {{.Topic}}
+  </h3>
+
+  <div id="values">
+    <span
+      id="center-span"
+      class="flex flex-col p-4 mt-3 bg-slate-50 rounded-lg border border-slate-200 shadow-sm"
+    >
+      <div class="flex justify-end text-sm text-slate">
+        <button onclick="" class="px-2 py-1 bg-slate-200 rounded">copy</button>
+      </div>
+      <pre class="max-h-64">{{.Value}}</pre>
+      {{.Type}}
+      <div class="flex justify-between items-center gap-2">
+        <span class="text-slate-500 text-xs font-medium">Last updated:</span>
+        <span class="text-slate-700 text-sm bg-slate-100 px-2 py-1 rounded"
+          >{{.Timestamp}}</span
+        >
+      </div>
+    </span>
+  </div>
+</div>

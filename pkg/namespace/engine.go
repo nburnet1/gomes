@@ -1,8 +1,8 @@
 package namespace
 
 import (
+	"encoding/json"
 	"fmt"
-	"reflect"
 	"regexp"
 	"strings"
 	"time"
@@ -34,7 +34,7 @@ func (e *NamespaceEngine) StartFromRegistry() error {
 	return nil
 }
 
-func (e *NamespaceEngine) CreateNode(topic string, value interface{}, eventHandler EventHandler) (node, error) {
+func (e *NamespaceEngine) CreateNode(topic string, value any, eventHandler EventHandler) (node, error) {
 	if !e.checkValidTopic(topic) {
 		return node{}, fmt.Errorf("invalid topic %s", topic)
 	} else if e.checkNodeExists(topic) {
@@ -47,28 +47,43 @@ func (e *NamespaceEngine) CreateNode(topic string, value interface{}, eventHandl
 	if parentTopic == "" {
 		parentNodePtr = nil
 	} else {
-		parentNode, err := e.checkForParent(parentTopic)
+		var err error
+		parentNodePtr, err = e.checkForParent(parentTopic)
 		if err != nil {
 			return node{}, err
 		}
-		parentNodePtr = &parentNode
+	}
+
+	var err error
+	var jsonValue []byte
+
+	if v, ok := value.([]byte); ok {
+		if !json.Valid(v) {
+			return node{}, fmt.Errorf("invalid JSON: %s", string(v))
+		}
+		jsonValue = v
+	} else {
+		jsonValue, err = json.MarshalIndent(value, "", "  ")
+		if err != nil {
+			return node{}, err
+		}
 	}
 
 	e.nodes[topic] = &node{
 		topic:        topic,
 		name:         relativeTopic,
 		parent:       parentNodePtr,
-		value:        value,
+		value:        jsonValue,
 		children:     make(map[string]*node),
 		timeStamp:    time.Now().UTC(),
 		eventHandler: eventHandler,
-		channel:      make(chan interface{}),
+		channel:      make(chan []byte),
 	}
 
 	if e.nodes[topic].channel != nil {
-		go func(ch chan interface{}, val interface{}) {
+		go func(ch chan []byte, val []byte) {
 			ch <- val
-		}(e.nodes[topic].channel, value)
+		}(e.nodes[topic].channel, jsonValue)
 	}
 
 	if parentNodePtr != nil {
@@ -82,7 +97,7 @@ func (e *NamespaceEngine) ReadNode(topic string) (node, error) {
 	if !e.checkValidTopic(topic) {
 		return node{}, fmt.Errorf("invalid topic %s", topic)
 	} else if !e.checkNodeExists(topic) {
-		return node{}, fmt.Errorf("node %s doesn'e exist", topic)
+		return node{}, fmt.Errorf("node %s doesn't exist", topic)
 	}
 	return *e.nodes[topic], nil
 }
@@ -101,42 +116,57 @@ func (e *NamespaceEngine) BrowseRootNodes() map[string]*node {
 	return rootNodes
 }
 
-func (e *NamespaceEngine) SubNode(topic string) (chan interface{}, error) {
+func (e *NamespaceEngine) SubNode(topic string) (chan []byte, error) {
 	if !e.checkValidTopic(topic) {
 		return nil, fmt.Errorf("invalid topic %s", topic)
 	} else if !e.checkNodeExists(topic) {
 		return nil, fmt.Errorf("node %s doesn't exist", topic)
 	}
-	readOnly := make(chan interface{})
+	readOnly := make(chan []byte)
 	e.nodes[topic].channel = readOnly
 	return readOnly, nil
 }
 
-func (e *NamespaceEngine) UpdateNode(topic string, value interface{}) (node, error) {
+func (e *NamespaceEngine) UpdateNode(topic string, value any) (node, error) {
 	if !e.checkValidTopic(topic) {
 		return node{}, fmt.Errorf("invalid topic %s", topic)
 	}
 	if !e.checkNodeExists(topic) {
 		return node{}, fmt.Errorf("node %s doesn't exist", topic)
 	}
-	if _, ok := e.nodes[topic].value.(Folder); ok {
+	if string(e.nodes[topic].value) == "_folder" {
 		return node{}, fmt.Errorf("can't update a node of type folder")
 	}
-	if e.nodes[topic].value == value {
+	var err error
+	var jsonValue []byte
+
+	if v, ok := value.([]byte); ok {
+		if !json.Valid(v) {
+			return node{}, fmt.Errorf("invalid JSON: %s", string(v))
+		}
+		jsonValue = v
+	} else {
+		jsonValue, err = json.MarshalIndent(value, "", "  ")
+		if err != nil {
+			return node{}, err
+		}
+	}
+
+	if string(e.nodes[topic].value) == string(jsonValue) {
 		return *e.nodes[topic], nil
 	}
 
 	nodePtr := e.nodes[topic]
 	oldValue := nodePtr.value
-	nodePtr.value = value
+	nodePtr.value = jsonValue
 	oldTimestamp := nodePtr.timeStamp
 	nodePtr.timeStamp = time.Now().UTC()
 
 	if nodePtr.channel != nil {
 		// Send the new value in a goroutine to avoid blocking
-		go func(ch chan interface{}, val interface{}) {
+		go func(ch chan []byte, val []byte) {
 			ch <- val
-		}(nodePtr.channel, value)
+		}(nodePtr.channel, jsonValue)
 	}
 
 	if nodePtr.eventHandler == nil {
@@ -183,19 +213,22 @@ func (e *NamespaceEngine) checkNodeExists(topic string) bool {
 	return ok
 }
 
-func (e *NamespaceEngine) checkForParent(parentTopic string) (node, error) {
-	var parent node
-
+func (e *NamespaceEngine) checkForParent(parentTopic string) (*node, error) {
 	if e.checkNodeExists(parentTopic) {
-		parent = *e.nodes[parentTopic]
+		parentNode := e.nodes[parentTopic]
 
-		if _, ok := parent.value.(Folder); !ok {
-			return node{}, fmt.Errorf("invalid hierarchy found. parent {%s} must be a folder but is really of type {%s}", parentTopic, reflect.TypeOf(parent.value).String())
+		parentValue := string(parentNode.value)
+		if parentValue != "\"_folder\"" {
+			return nil, fmt.Errorf("invalid hierarchy found. parent {%s} must be a folder but is really of type {%s}", parentTopic, string(parentNode.value))
 		}
+		return parentNode, nil
 	} else {
-		parent, _ = e.CreateNode(parentTopic, Folder{}, nil)
+		_, err := e.CreateNode(parentTopic, "_folder", nil)
+		if err != nil {
+			return nil, err
+		}
+		return e.nodes[parentTopic], nil
 	}
-	return parent, nil
 }
 
 func (e *NamespaceEngine) getSplitTopic(topic string) (string, string) {

@@ -8,6 +8,7 @@ var (
 	binPath = "bin"
 	dependencies = map[string][]string{
 		"internal/api": {"cmd/web"},
+		"pkg/namespace": {"cmd/namespace"},
 	}
 	// Excluded directories inside `cmd/`
 	pathsToExclude = []string{
