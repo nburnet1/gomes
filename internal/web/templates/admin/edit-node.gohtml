@@ -1,6 +1,11 @@
+{{ define "admin/edit-node"}}
 <div
   id="node"
   class="flex flex-col bg-white p-4 gap-2 rounded-xl shadow-md border border-slate-200"
+  
+  hx-trigger="sse:updated-{{.Topic}}"
+  hx-get="/admin/node?topic={{.Topic}}"
+  hx-swap="outerHTML"
 >
   <div class="flex justify-end flex-0">
     <button
@@ -28,7 +33,7 @@
       <div class="flex justify-end text-sm text-slate">
         <button onclick="" class="px-2 py-1 bg-slate-200 rounded">copy</button>
       </div>
-      <pre class="max-h-64">{{.Value}}</pre>
+      <pre sse-swap="updated-{{.Topic}}" hx-target="this" class="max-h-64">{{.Value}}</pre>
       {{.Type}}
       <div class="flex justify-between items-center gap-2">
         <span class="text-slate-500 text-xs font-medium">Last updated:</span>
@@ -39,3 +44,4 @@
     </span>
   </div>
 </div>
+{{ end }}

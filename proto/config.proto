@@ -16,3 +16,10 @@ message GetConfigRequest {
 message GetConfigResponse {
 	map<string, string> config = 1;
 }
+
+message GetActiveServices{
+
+}
+message GetActiveServicesResponse{
+	repeated string services = 1;
+}

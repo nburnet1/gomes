@@ -1,3 +1,4 @@
+{{ define "admin/node" }}
 <div class="group group-last:hover:border-l-1 border-blue-600">
 {{range .}}
     <ul class="pl-4 ">
@@ -18,7 +19,7 @@
                         <div class="px-2 flex justify-between items-center h-4 hover:bg-blue-100 rounded">
                         <div class="pr-2">{{.Name}}</div>
                         <div class="truncate font-mono text-ellipsis text-xs flex-1 flex justify-end"
-                        sse-swap="updated-{{.Topic}}">{{.Value}}</div>
+                        sse-swap="updated-{{.Topic}}" hx-select="#sse-value" hx-target="this">{{.Value}}</div>
                         <div>
                     
                 {{ end }}
@@ -27,3 +28,4 @@
     </ul>
 {{end}}
 <div>
+{{ end }}

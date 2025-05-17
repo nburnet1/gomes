@@ -1,21 +1,21 @@
-
+{{define "admin/stash"}}
   <span
-    id="center-span"
-    name="stash-values-{{.Topic}}"
+    id="stash-values-{{.Topic}}"
     class="flex flex-col p-4 mt-3 bg-slate-50 rounded-lg border border-slate-200 shadow-sm"
-    hx-trigger="sse:nodeUpdated"
+    hx-trigger="sse:updated-{{.Topic}}"
     hx-get="/admin/node/stash?topic={{.Topic}}"
+    hx-swap="outerHTML"
   >
     <div class="flex justify-between items-center p-2">
       <div class="">{{.Topic}}</div>
       <button
-        hx-on:click='document.getElementsByName("stash-values-{{.Topic}}")[0].remove()'
+        hx-on:click='document.getElementById("stash-values-{{.Topic}}").remove()'
         class="rounded border hover:text-red-600 text-xl px-2"
       >
         ×
       </button>
     </div>
-    <pre class="max-h-64">{{.Value}}</pre>
+    <pre sse-swap="updated-{{.Topic}}" hx-target="this" class="max-h-64">{{.Value}}</pre>
     {{.Type}}
 
     <div class="flex justify-between items-center mt-2 gap-2">
@@ -25,4 +25,6 @@
       >
     </div>
   </span>
+
+{{end}}
 

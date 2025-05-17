@@ -3,13 +3,12 @@ package api
 import (
 	"context"
 	"fmt"
-	"io"
 	"slices"
 	"strings"
 	"time"
 
 	"github.com/nburnet1/gomes/internal/config"
-	"github.com/nburnet1/gomes/internal/grpcclient"
+	"github.com/nburnet1/gomes/internal/client"
 	"github.com/nburnet1/gomes/internal/util"
 	pb "github.com/nburnet1/gomes/proto"
 
@@ -39,13 +38,18 @@ func init() {
 			Url:      "/admin/node/stash",
 			Handlers: []gin.HandlerFunc{stashNode},
 		},
+		{
+			Method:   config.GET,
+			Url:      "/test",
+			Handlers: []gin.HandlerFunc{func(c *gin.Context) { c.HTML(200, "admin/test", nil) }},
+		},
 		
 	}
 	config.RegisterEndpoints(endpoints...)
 }
 
 func getNamespace(c *gin.Context) {
-	namespaceClient := grpcclient.NamespaceClient
+	namespaceClient := client.NamespaceGRPC.Client
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
@@ -94,9 +98,9 @@ func getNamespace(c *gin.Context) {
 	})
 
 	// Determine template
-	template := "namespace.html"
+	template := "admin/namespace"
 	if topic != "" {
-		template = "node.html"
+		template = "admin/node"
 	}
 	c.HTML(200, template, jsonNodes)
 }
@@ -110,7 +114,7 @@ func getNode(c *gin.Context) {
 		return
 	}
 
-	NamespaceClient := grpcclient.NamespaceClient
+	NamespaceClient := client.NamespaceGRPC.Client
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
@@ -134,7 +138,7 @@ func getNode(c *gin.Context) {
 		Type:        fmt.Sprintf("%T", value),
 	}
 
-	c.HTML(200, "edit-node.html", jsonNode)
+	c.HTML(200, "admin/edit-node", jsonNode)
 }
 
 func stashNode(c *gin.Context) {
@@ -144,8 +148,7 @@ func stashNode(c *gin.Context) {
 		RenderError(c, 400, "No topic provided")
 		return
 	}
-
-	NamespaceClient := grpcclient.NamespaceClient
+	NamespaceClient := client.NamespaceGRPC.Client
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
@@ -169,7 +172,7 @@ func stashNode(c *gin.Context) {
 		Type:        fmt.Sprintf("%T", value),
 	}
 
-	c.HTML(200, "stash.html", jsonNode)
+	c.HTML(200, "admin/stash", jsonNode)
 
 }
 
@@ -180,67 +183,69 @@ func subNode(c *gin.Context) {
 	c.Writer.Header().Set("Connection", "keep-alive")
 	c.Writer.Flush()
 
+	// Create a channel for SSE messages
+	messageChan := make(chan string)
+
 	// Get the topic from query params
 	topic := c.Query("topic")
 	fmt.Println("Subscribing to topic:", topic)
+
 	// Establish gRPC stream
-	namespaceClient := grpcclient.NamespaceClient
+	namespaceClient := client.NamespaceGRPC.Client
 	ctx, cancel := context.WithCancel(c.Request.Context()) // Use Gin's request context to handle disconnections
 	defer cancel()
 
+	// Fetch all available nodes
 	allNodesRequest, err := namespaceClient.BrowseNodes(ctx, &pb.BrowseNodesRequest{})
 	if err != nil {
 		fmt.Println("Failed to get all nodes:", err)
 		return
 	}
 
-	for _, node := range allNodesRequest.Nodes {
-		fmt.Println("Node:", node.Topic)
-	}
-
-	
-	serverStream, err := namespaceClient.SubNode(ctx, &pb.SubNodeRequest{Topic: topic})
-	if err != nil {
-		// For SSE, we need to send the error as an SSE event
-		_, writeErr := fmt.Fprintf(c.Writer, "event: error\ndata: Failed to subscribe to node\n\n")
-		if writeErr != nil {
-			fmt.Println("Error writing to response:", writeErr)
-		}
-		c.Writer.Flush()
-		return
-	}
-
-	// Create a channel to detect when the client disconnects
-	notify := c.Writer.CloseNotify()
-
-	for {
-		select {
-		case <-notify:
-			fmt.Println("Client disconnected")
-			return
-		default:
-			// Read messages from gRPC stream
-			node, err := serverStream.Recv()
-
-			if err != nil {
-				if err == io.EOF {
-					fmt.Println("Stream closed by server")
-				} else {
-					fmt.Println("Error receiving from stream:", err)
-				}
-				return
-			}
-
-			// Send SSE event to client
-			_, writeErr := fmt.Fprintf(c.Writer, "event: updated-%s\ndata: %s\n\n", node.Topic,node.Value)
-
+	// Start a goroutine to write SSE messages
+	go func() {
+		for msg := range messageChan {
+			_, writeErr := fmt.Fprintf(c.Writer, "%s\n", msg)
 			if writeErr != nil {
-				fmt.Println("Error writing to response:", writeErr)
-				return
+				fmt.Println("Error writing SSE event:", writeErr)
+				break
 			}
-
-			// Flush to ensure the event is sent immediately
 			c.Writer.Flush()
 		}
+	}()
+
+	// Iterate over all nodes and subscribe to them
+	for _, node := range allNodesRequest.Nodes {
+		go func(nodeTopic string) {
+			fmt.Println("Subscribing to:", nodeTopic)
+
+			serverStream, err := namespaceClient.SubNode(ctx, &pb.SubNodeRequest{Topic: nodeTopic})
+			if err != nil {
+				messageChan <- fmt.Sprintf("event: error\ndata: Failed to subscribe to %s\n\n", nodeTopic)
+				return
+			}
+
+			// Stream messages from the node
+			for {
+				select {
+				case <-ctx.Done(): // Stop if client disconnects
+					fmt.Println("Client disconnected from", nodeTopic)
+					return
+				default:
+					node, err := serverStream.Recv()
+					if err != nil {
+						fmt.Println("Error receiving from stream:", err)
+						return
+					}
+
+					// Send SSE event to the message channel
+					messageChan <- fmt.Sprintf("event: updated-%s\ndata: %s\n\n", node.Topic, node.Value)
+				}
+			}
+		}(node.Topic)
 	}
+
+	// Wait for client disconnect
+	<-c.Writer.CloseNotify()
+	close(messageChan) // Cleanup when client disconnects
 }

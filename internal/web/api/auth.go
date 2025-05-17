@@ -6,7 +6,7 @@ import (
 
 
 	"github.com/nburnet1/gomes/internal/config"
-	"github.com/nburnet1/gomes/internal/grpcclient"
+	"github.com/nburnet1/gomes/internal/client"
 	pb "github.com/nburnet1/gomes/proto"
 
 	"github.com/gin-gonic/gin"
@@ -41,7 +41,7 @@ func handleLogin(c *gin.Context) {
 	username := c.PostForm("username")
 	password := c.PostForm("password")
 
-	authClient := grpcclient.AuthClient
+	authClient := client.AuthGRPC.Client
 
 	// Call gRPC Login
 	resp, err := authClient.Login(context.Background(), &pb.LoginRequest{
@@ -67,7 +67,7 @@ func authenticateMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		authClient := grpcclient.AuthClient
+		authClient := client.AuthGRPC.Client
 
 		// Validate token via gRPC
 		resp, err := authClient.ValidateToken(context.Background(), &pb.ValidateTokenRequest{Token: token})

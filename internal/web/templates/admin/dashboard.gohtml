@@ -2,9 +2,9 @@
 <html lang="en">
   <head>
     <title>Dashboard</title>
-    {{template "head.html" .}}
+    {{template "head.gohtml" .}}
   </head>
-  {{template "navbar.html" .}}
+  {{template "navbar.gohtml" .}}
   <body hx-boost="true">
     <h1>Welcome, {{ . }}</h1>
     <p>Role: {{ .Role }}</p>

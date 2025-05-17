@@ -169,6 +169,7 @@ func main() {
 		fmt.Println("Config migration error:", err)
 	}
 
+
 	// Start Namespace Engine
 	if err := namespace.Engine.StartFromRegistry(); err != nil {
 		fmt.Println("Namespace engine startup error:", err)
@@ -183,6 +184,7 @@ func main() {
 	if err != nil {
 		fmt.Println("Error creating node:", err)
 	}
+
 
 	fmt.Println("nodes:",namespace.Engine.BrowseNodes())
 	// gRPC Server
